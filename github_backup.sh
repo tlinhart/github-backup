@@ -9,7 +9,8 @@ find ${DIR} -mindepth 1 -maxdepth 1 -type d | \
     xargs -I % sh -c "echo 'Deleting directory %'; rm -rf %"
 
 cd ${DIR} && \
-    curl -s -H "Authorization: token ${TOKEN}" 'https://api.github.com/user/repos' | \
+    curl -s -H "Authorization: token ${TOKEN}" \
+               'https://api.github.com/user/repos?per_page=100' | \
     jq -r -c '.[] | select(.fork == false)' | \
     while read repo; do
         full_name=$(echo "${repo}" | jq -r '.full_name')
