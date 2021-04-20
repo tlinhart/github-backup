@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-DIR=$(cd "$(dirname "$0")"; pwd -P)
+SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd -P)
 
-TOKEN=YOUR_TOKEN
+DIR=${BACKUP_DIR:-${SCRIPT_DIR}/backup}
+TOKEN=${GITHUB_TOKEN:-your-github-token}
 
 echo "Working directory ${DIR}"
+mkdir -p ${DIR}
 find ${DIR} -mindepth 1 -maxdepth 1 -type d | \
     xargs -I % sh -c "echo 'Deleting directory %'; rm -rf %"
 
