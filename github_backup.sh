@@ -13,9 +13,21 @@ mkdir -p ${DIR}
 find ${DIR} -mindepth 1 -maxdepth 1 -type d \
   | xargs -I % sh -c "echo 'Deleting directory %'; rm -rf %"
 
-REPOS=$(curl -s -H "Authorization: token ${TOKEN}" \
-  'https://api.github.com/user/repos?per_page=100' \
-  | jq -r -c '.[] | select(.fork == false)')
+all_repos=""
+page=1
+while true; do
+  repos=$(curl -s -H "Authorization: token ${TOKEN}" \
+    "https://api.github.com/user/repos?per_page=100&page=${page}" \
+    | jq -r -c '.[]')
+  if [ -n "${repos}" ]; then
+    all_repos="${all_repos}"$'\n'"${repos}"
+    page=$((page + 1))
+  else
+    break
+  fi
+done
+filtered_repos=$(echo "${all_repos}" \
+  | jq -r -c '. | select(.fork == false)')
 
 ok_count=0
 failed_count=0
@@ -52,6 +64,6 @@ while read repo; do
       failed_count=$((failed_count + 1))
     fi
   fi
-done <<< ${REPOS}
+done <<< ${filtered_repos}
 
 echo "OK: ${ok_count} | Failed: ${failed_count}"
