@@ -8,6 +8,7 @@ To use it, set `BACKUP_DIR` (default `backup`) and `GITHUB_TOKEN` environment
 variables and run the script.
 
 Dependencies:
+
 - curl
 - jq
 - git
