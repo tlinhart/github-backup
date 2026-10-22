@@ -30,6 +30,7 @@ filtered_repos=$(echo "${all_repos}" \
   | jq -r -c '. | select(.fork == false)')
 
 ok_count=0
+skipped_count=0
 failed_count=0
 
 cd ${DIR}
@@ -54,6 +55,13 @@ while read repo; do
     wiki_clone_url=$(echo "${clone_url}" \
       | sed -E "s/(.*)(\.git|$)/\1.wiki\2/")
 
+    git ls-remote ${wiki_clone_url} > /dev/null 2>&1
+    if [ $? != 0 ]; then
+      echo "Skipping ${full_name}.wiki (unavailable)"
+      skipped_count=$((skipped_count + 1))
+      continue
+    fi
+
     echo -n "Cloning ${full_name}.wiki ... "
     git clone ${wiki_clone_url} "${full_name}.wiki" > /dev/null 2>&1
     if [ $? == 0 ]; then
@@ -66,4 +74,4 @@ while read repo; do
   fi
 done <<< ${filtered_repos}
 
-echo "OK: ${ok_count} | Failed: ${failed_count}"
+echo "OK: ${ok_count} | Skipped: ${skipped_count} | Failed: ${failed_count}"
